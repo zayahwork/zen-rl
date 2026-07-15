@@ -1,6 +1,7 @@
 import sys
 from zen.ingest.tensorboard import load_run
 from zen.detect.rules import detect
+from zen.router import route
 
 def main():
     if len(sys.argv) != 2:
@@ -18,6 +19,9 @@ def main():
                 print(issue)
         else:
             print("no issues detected")
+        
+        tier = route(metrics, issues)
+        print(f"tier: {tier}")
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
