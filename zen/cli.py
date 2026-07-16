@@ -2,6 +2,7 @@ import sys
 from zen.ingest.tensorboard import load_run
 from zen.detect.rules import detect
 from zen.router import route
+from zen.memory.store import record
 
 def main():
     if len(sys.argv) != 2:
@@ -22,6 +23,9 @@ def main():
         
         tier = route(metrics, issues)
         print(f"tier: {tier}")
+        
+        # Record the run path, issues, and tier
+        record(run_dir, issues, tier)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
