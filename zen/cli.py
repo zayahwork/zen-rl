@@ -3,6 +3,7 @@ from zen.ingest.tensorboard import load_run
 from zen.detect.rules import detect
 from zen.router import route
 from zen.memory.store import record, history
+from zen.vlak import recommend
 
 def main():
     if len(sys.argv) != 2:
@@ -31,6 +32,11 @@ def main():
             
             # Record the run path, issues, and tier
             record(run_dir, issues, tier)
+            
+            # Get recommendations based on issues
+            recs = recommend(issues)
+            for rec in recs:
+                print(rec)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
