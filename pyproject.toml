@@ -1,7 +1,7 @@
 [project]
 name = "zen-rl"
 version = "0.1.0"
-description = "description = "Diagnose failed RL training runs from TensorBoard logs. No LLM, instant, free."
+description = "Diagnose failed RL training runs from TensorBoard logs. No LLM, instant, free."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -9,7 +9,7 @@ dependencies = [
     "tbparse>=0.0.9",
     "tensorboard>=2.14",
 ]
-]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["zen*"]
