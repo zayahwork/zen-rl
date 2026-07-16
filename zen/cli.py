@@ -27,7 +27,8 @@ def main():
                     print(mode)
                 
                 # Record the run path, issues, and tier
-                record(run_dir, modes, route(metrics, issues))
+                tier = route(metrics, issues)
+                record(run_dir, modes, tier)
                 
                 # Get recommendations based on issues
                 recs = recommend(issues)

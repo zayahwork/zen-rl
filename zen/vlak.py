@@ -23,7 +23,7 @@ def recommend(issues: list) -> list:
         metric = issue['metric']
         
         recommendation = RECOMMENDATIONS.get(mode, f"No recommendation found for issue: {mode}")
-        evidence = f"Evidence: {metric} = {value} at step {step}"
+        evidence = f"Evidence: {metric} = {value:.4g} at step {step}"
         
         recommendations.append(f"{recommendation} {evidence}")
     
