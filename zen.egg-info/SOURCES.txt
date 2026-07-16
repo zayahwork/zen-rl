@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+zen/__init__.py
+zen/cli.py
+zen.egg-info/PKG-INFO
+zen.egg-info/SOURCES.txt
+zen.egg-info/dependency_links.txt
+zen.egg-info/requires.txt
+zen.egg-info/top_level.txt
+zen/detect/__init__.py
+zen/detect/rules.py
+zen/ingest/__init__.py
+zen/ingest/tensorboard.py

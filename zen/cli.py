@@ -3,7 +3,7 @@ from zen.ingest.tensorboard import load_run
 from zen.detect.rules import detect
 from zen.router import route
 from zen.memory.store import record, history
-from zen.vlak import recommend
+from zen.vlak import recommend, rank, group
 
 def main():
     if len(sys.argv) != 2:
@@ -22,7 +22,8 @@ def main():
             issues = detect(metrics)
             
             if issues:
-                modes = [issue['mode'] for issue in issues]
+                grouped = group(rank(issues))
+                modes = [issue['mode'] for issue in grouped]
                 for mode in modes:
                     print(mode)
                 
@@ -31,7 +32,7 @@ def main():
                 record(run_dir, modes, tier)
                 
                 # Get recommendations based on issues
-                recs = recommend(issues)
+                recs = recommend(grouped)
                 for rec in recs:
                     print(rec)
             else:
