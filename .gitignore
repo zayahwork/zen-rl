@@ -1,2 +1,5 @@
-.aider*
-.env
+__pycache__/
+*.pyc
+*.egg-info/
+zen_memory.db
+.venv/

@@ -1,0 +1,249 @@
+
+# 2026-07-15 18:35:51.659637
++y
+
+# 2026-07-15 18:35:57.195924
++write hello.py that prints hi
+
+# 2026-07-15 18:36:05.012323
++y
+
+# 2026-07-15 18:36:29.763148
++/exit
+
+# 2026-07-15 18:43:29.008298
++> create zen/detect/rules.py with a function detect(metrics: dict) -> list[str].
+
+# 2026-07-15 18:43:33.207219
++> metrics maps tag names to lists of (step, value).
+
+# 2026-07-15 18:43:33.221218
++> Rule 1: if approx_kl ever exceeds 1.0, return "LR_TOO_HIGH".
+
+# 2026-07-15 18:43:33.239219
++> Rule 2: if entropy_loss drops below 1e-6 in absolute value after step 5000, return "POLICY_COLLAPSE".
+
+# 2026-07-15 18:43:33.255218
++> Rule 3: if any abs(policy_gradient_loss) > 1.0, return "ADVANTAGE_NOT_NORMALIZED".
+
+# 2026-07-15 18:44:06.110802
++m> Return an empty list if nothing fires.
+
+# 2026-07-15 18:44:07.126963
++m
+
+# 2026-07-15 18:44:08.777416
++n
+
+# 2026-07-15 18:44:30.813423
++create zen/detect/rules.py with detect(metrics: dict) -> list[str] where metrics maps tag names like "train/approx_kl" to lists of (step, value) tuples. Rule 1: if any approx_kl value exceeds 1.0, add "LR_TOO_HIGH". Rule 2: if any abs(entropy_loss) < 1e-6 at a step greater than 5000, add "POLICY_COLLAPSE". Rule 3: if any abs(policy_gradient_loss) > 1.0, add "ADVANTAGE_NOT_NORMALIZED". Return empty list if nothing fires. No LLM calls, pure python.
+
+# 2026-07-15 18:45:00.617385
++y
+
+# 2026-07-15 18:45:40.596334
++/paste
+
+# 2026-07-15 18:46:24.425434
++in zen/detect/rules.py use a set instead of a list so each issue appears only once, and add "break" after each append so we stop scanning that metric once it fires
+
+# 2026-07-15 18:46:40.846119
++create zen/ingest/tensorboard.py with load_run(path: str) -> dict that uses tbparse SummaryReader to read a tensorboard log directory and return a dict mapping tag names to lists of (step, value) tuples
+
+# 2026-07-15 18:46:57.942974
++y
+
+# 2026-07-15 18:48:16.007030
++rewrite zen/ingest/tensorboard.py load_run to use SummaryReader(path).scalars which returns a pandas DataFrame with columns step, tag, value. Group that dataframe by tag and build a dict mapping each tag to a list of (step, value) tuples sorted by step.
+
+# 2026-07-15 18:48:43.213638
++create zen/cli.py that takes a run directory path as a command line argument with sys.argv, calls load_run from zen.ingest.tensorboard, passes the result to detect from zen.detect.rules, prints each detected issue on its own line, and prints "no issues detected" if the list is empty
+
+# 2026-07-15 18:48:52.910864
++y
+
+# 2026-07-15 18:49:03.942322
++/exit
+
+# 2026-07-15 18:56:29.404439
++create zen/router.py with a function route(metrics: dict, issues: list) -> int that returns a tier number. Return 0 if issues is non-empty, meaning rules already answered and no model is needed. Return 2 if issues is empty but the final value of rollout/ep_rew_mean is less than half the maximum value seen during the run, meaning something went wrong that rules did not catch. Return 0 otherwise. Pure python, no LLM calls.
+
+# 2026-07-15 18:56:34.382800
++y
+
+# 2026-07-15 18:56:49.529549
++create zen/router.py with a function route(metrics: dict, issues: list) -> int that returns a tier number. Return 0 if issues is non-empty, meaning rules already answered and no model is needed. Return 2 if issues is empty but the final value of rollout/ep_rew_mean is less than half the maximum value seen during the run, meaning something went wrong that rules did not catch. Return 0 otherwise. Pure python, no LLM calls.
+
+# 2026-07-15 18:57:13.669774
++update zen/cli.py to call route from zen.router after detect, and print the tier number as "tier: N" on its own line after the issues
+
+# 2026-07-15 18:57:15.271086
++y
+
+# 2026-07-15 18:57:27.063894
++uv run zen/cli.py evals/runs/lr_too_high_1
+
+# 2026-07-15 18:57:30.874872
++uv run zen/cli.py evals/runs/good_1
+
+# 2026-07-15 18:57:34.694138
++uv run zen/cli.py evals/runs/no_norm_1
+
+# 2026-07-15 18:57:42.149015
++uv run zen/cli.py evals/runs/tiny_batch_1
+
+# 2026-07-15 18:58:07.286335
++/exit
+
+# 2026-07-15 18:59:49.651943
++fix zen/router.py route function. The metrics values are lists of (step, value) tuples, not bare numbers. Extract the values first with a list comprehension like values = [v for step, v in metrics['rollout/ep_rew_mean']], then use max(values) and values[-1] for the comparison.
+
+# 2026-07-15 18:59:51.677042
++y
+
+# 2026-07-15 19:00:06.233370
++/exit
+
+# 2026-07-15 19:01:18.031741
++create zen/memory/store.py using sqlite3 with a database file at zen_memory.db. Create a table called experiment with columns id integer primary key, run_path text, timestamp text, issues text, tier integer. Add a function record(run_path: str, issues: list, tier: int) that inserts a row with the issues joined by comma and the current timestamp. Add a function history(limit: int = 10) -> list that returns the most recent rows as tuples. Create the table if it does not exist.
+
+# 2026-07-15 19:01:32.116628
++y
+
+# 2026-07-15 19:01:45.334852
++update zen/cli.py to call record from zen.memory.store after printing the tier, passing the run path, issues, and tier
+
+# 2026-07-15 19:01:46.733820
++y
+
+# 2026-07-15 19:02:22.645357
++aider
+
+# 2026-07-15 19:02:31.775431
++/exit
+
+# 2026-07-15 19:03:24.892433
++update zen/cli.py so that if the command line argument is the word history, it calls history from zen.memory.store and prints each row on its own line, instead of loading a run
+
+# 2026-07-15 19:03:34.188961
++y
+
+# 2026-07-15 19:03:46.665285
++/exit
+
+# 2026-07-15 19:05:48.479833
++create zen/vlak.py with a dict called RECOMMENDATIONS mapping each failure mode string to a recommended next experiment string. LR_TOO_HIGH maps to "Drop learning rate to 3e-4 and add a 500 step warmup, then rerun." POLICY_COLLAPSE maps to "Policy entropy hit zero and stopped learning. Lower the learning rate and add an entropy bonus of 0.01." ADVANTAGE_NOT_NORMALIZED maps to "Set normalize_advantage=True. The run may still learn but this will break on harder environments." Add a function recommend(issues: list) -> list that returns the recommendation string for each issue found, and returns a list with one string "No failure detected. Run looks healthy." if issues is empty.
+
+# 2026-07-15 19:05:55.144596
++y
+
+# 2026-07-15 19:06:10.088153
++update zen/cli.py to call recommend from zen.vlak after printing the tier, and print each recommendation on its own line
+
+# 2026-07-15 19:06:11.637202
++y
+
+# 2026-07-15 19:07:46.381878
++create zen/vlak.py with a dict called RECOMMENDATIONS mapping each failure mode string to a recommended next experiment string. LR_TOO_HIGH maps to "Drop learning rate to 3e-4 and add a 500 step warmup, then rerun." POLICY_COLLAPSE maps to "Policy entropy hit zero and stopped learning. Lower the learning rate and add an entropy bonus of 0.01." ADVANTAGE_NOT_NORMALIZED maps to "Set normalize_advantage=True. The run may still learn but this will break on harder environments." Add a function recommend(issues: list) -> list that returns the recommendation string for each issue found, and returns a list with one string "No failure detected. Run looks healthy." if issues is empty.
+
+# 2026-07-15 19:08:03.252377
++update zen/cli.py to call recommend from zen.vlak after printing the tier, and print each recommendation on its own line
+
+# 2026-07-15 19:08:24.233488
++/exit
+
+# 2026-07-15 19:09:14.956799
++in zen/vlak.py add a list called PRIORITY containing LR_TOO_HIGH first, then ADVANTAGE_NOT_NORMALIZED, then POLICY_COLLAPSE. Add a function rank(issues: list) -> list that sorts issues by their index in PRIORITY so root causes come before downstream symptoms. Update recommend to call rank on issues first before building the recommendation list.
+
+# 2026-07-15 19:09:17.136650
++y
+
+# 2026-07-15 19:09:34.719938
++uv run zen/cli.py evals/runs/lr_too_high_1
+
+# 2026-07-15 19:09:41.310424
++y
+
+# 2026-07-15 19:09:55.848568
++/exit
+
+# 2026-07-15 19:10:43.426375
++in zen/detect/rules.py change detect to return a list of dicts instead of strings. Each dict has keys: mode (the failure mode string), step (the step where the rule fired), value (the metric value that triggered it), and metric (the tag name). Keep the same three rules and the same thresholds.
+
+# 2026-07-15 19:10:51.138346
++y
+
+# 2026-07-15 19:11:22.983084
++aider
+
+# 2026-07-15 19:11:30.846870
++in zen/detect/rules.py change detect to return a list of dicts instead of strings. Each dict has keys: mode (the failure mode string), step (the step where the rule fired), value (the metric value that triggered it), metric (the tag name). Keep the same three rules and same thresholds.
+
+# 2026-07-15 19:11:42.867642
++in zen/vlak.py update rank and recommend to work with the new dict format. rank sorts by PRIORITY.index of the mode key. recommend returns a list of strings where each string is the recommendation followed by the evidence in this format: "RECOMMENDATION Evidence: metric = value at step N"
+
+# 2026-07-15 19:11:47.378902
++y
+
+# 2026-07-15 19:12:11.210934
++in zen/cli.py update to work with the new dict format from detect. Print each issue's mode key instead of the string. Pass the list of mode strings to record and route.
+
+# 2026-07-15 19:12:12.924362
++y
+
+# 2026-07-15 19:12:46.032660
++/exit
+
+# 2026-07-15 19:13:33.717648
++in zen/cli.py make sure route is still called and the tier is printed as "tier: N" after the issues and before the recommendations. In zen/vlak.py round the evidence value to 4 significant figures using the g format specifier so it prints as 21.73 instead of 21.727489471435547.
+
+# 2026-07-15 19:13:41.247608
++y
+
+# 2026-07-15 19:25:35.708796
++aider --yes
+
+# 2026-07-15 19:47:13.501840
++in zen/detect/rules.py change the approx_kl threshold from 1.0 to 5.0. Real divergence hits 21, but a healthy run can briefly touch 1.06, which caused a false positive.
+
+# 2026-07-15 19:47:14.734863
++y
+
+# 2026-07-15 19:47:45.299990
++in zen/detect/rules.py add two new rules using rollout/ep_rew_mean. Rule 4: if the final value is less than 50, add mode DEAD_RUN with the final step and value and metric rollout/ep_rew_mean. Rule 5: if the final value is between 50 and 250, add mode CAPPED_PERFORMANCE with the final step and value. Keep the existing three rules unchanged.
+
+# 2026-07-15 19:48:09.318584
++in zen/vlak.py add two entries to RECOMMENDATIONS. DEAD_RUN maps to "Run never learned. Reward stayed near starting value. Check learning rate is not too high or too low, and check clip_range is not tiny." CAPPED_PERFORMANCE maps to "Run learned but plateaued well below what is achievable. Check ent_coef is not too high, n_epochs is not too low, and gae_lambda is not zero." Add both to the PRIORITY list after LR_TOO_HIGH and before POLICY_COLLAPSE.
+
+# 2026-07-15 19:48:27.707104
++/exit
+
+# 2026-07-15 19:49:48.203703
++in zen/vlak.py the PRIORITY list is missing ADVANTAGE_NOT_NORMALIZED which causes a crash in rank. Set PRIORITY to exactly this order: LR_TOO_HIGH, DEAD_RUN, ADVANTAGE_NOT_NORMALIZED, CAPPED_PERFORMANCE, POLICY_COLLAPSE. Also make rank tolerant of unknown modes by using a key function that returns a large number if the mode is not in PRIORITY.
+
+# 2026-07-15 19:49:54.005031
++D
+
+# 2026-07-15 19:50:13.076606
++y
+
+# 2026-07-15 19:50:29.757249
++in zen/vlak.py the PRIORITY list is missing ADVANTAGE_NOT_NORMALIZED which causes a crash in rank. Set PRIORITY to exactly this order: LR_TOO_HIGH, DEAD_RUN, ADVANTAGE_NOT_NORMALIZED, CAPPED_PERFORMANCE, POLICY_COLLAPSE. Also make rank tolerant of unknown modes by using a key function that returns 999 if the mode is not in PRIORITY.
+
+# 2026-07-15 19:50:40.549595
++/exit
+
+# 2026-07-15 19:55:20.802887
++in zen/vlak.py add a dict called CAUSED_BY mapping POLICY_COLLAPSE to LR_TOO_HIGH and DEAD_RUN to LR_TOO_HIGH. Add a function group(issues: list) -> list that takes ranked issues and removes any issue whose CAUSED_BY value is present in the list of modes, since it is a downstream consequence not a root cause. Update recommend to call group after rank. Do not change RECOMMENDATIONS or PRIORITY.
+
+# 2026-07-15 19:55:22.829226
++d
+
+# 2026-07-15 19:55:34.845183
++y
+
+# 2026-07-15 19:55:56.661623
++exit
+
+# 2026-07-15 19:56:08.992439
++/exit

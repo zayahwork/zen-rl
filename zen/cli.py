@@ -36,7 +36,9 @@ def main():
                 for rec in recs:
                     print(rec)
             else:
-                print("No issues detected")
+                print("No known failure modes detected.")
+                print("Checked: LR_TOO_HIGH, DEAD_RUN, CAPPED_PERFORMANCE,")
+                print("         ADVANTAGE_NOT_NORMALIZED, POLICY_COLLAPSE")
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
