@@ -46,4 +46,28 @@ def detect(metrics: dict) -> list[dict]:
                 })
                 break
     
+    # Rule 4: if the final value is less than 50, add mode DEAD_RUN with the final step and value, and metric rollout/ep_rew_mean
+    if 'rollout/ep_rew_mean' in metrics:
+        final_step = max(step for step, _ in metrics['rollout/ep_rew_mean'])
+        final_value = [value for step, value in metrics['rollout/ep_rew_mean'] if step == final_step][0]
+        if final_value < 50:
+            issues.append({
+                'mode': "DEAD_RUN",
+                'step': final_step,
+                'value': final_value,
+                'metric': 'rollout/ep_rew_mean'
+            })
+    
+    # Rule 5: if the final value is between 50 and 250, add mode CAPPED_PERFORMANCE with the final step and value
+    if 'rollout/ep_rew_mean' in metrics:
+        final_step = max(step for step, _ in metrics['rollout/ep_rew_mean'])
+        final_value = [value for step, value in metrics['rollout/ep_rew_mean'] if step == final_step][0]
+        if 50 <= final_value < 250:
+            issues.append({
+                'mode': "CAPPED_PERFORMANCE",
+                'step': final_step,
+                'value': final_value,
+                'metric': 'rollout/ep_rew_mean'
+            })
+    
     return issues
