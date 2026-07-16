@@ -1,10 +1,12 @@
 RECOMMENDATIONS = {
     "LR_TOO_HIGH": "Drop learning rate to 3e-4 and add a 500 step warmup, then rerun.",
     "POLICY_COLLAPSE": "Policy entropy hit zero and stopped learning. Lower the learning rate and add an entropy bonus of 0.01.",
-    "ADVANTAGE_NOT_NORMALIZED": "Set normalize_advantage=True. The run may still learn but this will break on harder environments."
+    "ADVANTAGE_NOT_NORMALIZED": "Set normalize_advantage=True. The run may still learn but this will break on harder environments.",
+    "DEAD_RUN": "Run never learned. Reward stayed near starting value. Check learning rate is not too high or too low, and check clip_range is not tiny.",
+    "CAPPED_PERFORMANCE": "Run learned but plateaued well below what is achievable. Check ent_coef is not too high, n_epochs is not too low, and gae_lambda is not zero."
 }
 
-PRIORITY = ["LR_TOO_HIGH", "ADVANTAGE_NOT_NORMALIZED", "POLICY_COLLAPSE"]
+PRIORITY = ["LR_TOO_HIGH", "DEAD_RUN", "CAPPED_PERFORMANCE", "POLICY_COLLAPSE"]
 
 def rank(issues: list) -> list:
     return sorted(issues, key=lambda issue: PRIORITY.index(issue['mode']))
