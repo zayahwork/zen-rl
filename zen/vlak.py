@@ -4,7 +4,13 @@ RECOMMENDATIONS = {
     "ADVANTAGE_NOT_NORMALIZED": "Set normalize_advantage=True. The run may still learn but this will break on harder environments."
 }
 
+PRIORITY = ["LR_TOO_HIGH", "ADVANTAGE_NOT_NORMALIZED", "POLICY_COLLAPSE"]
+
+def rank(issues: list) -> list:
+    return sorted(issues, key=lambda issue: PRIORITY.index(issue))
+
 def recommend(issues: list) -> list:
     if not issues:
         return ["No failure detected. Run looks healthy."]
-    return [RECOMMENDATIONS.get(issue, f"No recommendation found for issue: {issue}") for issue in issues]
+    ranked_issues = rank(issues)
+    return [RECOMMENDATIONS.get(issue, f"No recommendation found for issue: {issue}") for issue in ranked_issues]
