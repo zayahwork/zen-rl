@@ -22,21 +22,19 @@ def main():
             issues = detect(metrics)
             
             if issues:
-                for issue in issues:
-                    print(issue)
+                modes = [issue['mode'] for issue in issues]
+                for mode in modes:
+                    print(mode)
+                
+                # Record the run path, issues, and tier
+                record(run_dir, modes, route(metrics, issues))
+                
+                # Get recommendations based on issues
+                recs = recommend(issues)
+                for rec in recs:
+                    print(rec)
             else:
-                print("no issues detected")
-            
-            tier = route(metrics, issues)
-            print(f"tier: {tier}")
-            
-            # Record the run path, issues, and tier
-            record(run_dir, issues, tier)
-            
-            # Get recommendations based on issues
-            recs = recommend(issues)
-            for rec in recs:
-                print(rec)
+                print("No issues detected")
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
