@@ -10,10 +10,10 @@ def detect(metrics: dict) -> list[dict]:
     """
     issues = []
     
-    # Rule 1: if any approx_kl value exceeds 1.0, add "LR_TOO_HIGH"
+    # Rule 1: if any approx_kl value exceeds 5.0, add "LR_TOO_HIGH"
     if 'train/approx_kl' in metrics:
         for step, value in metrics['train/approx_kl']:
-            if value > 1.0:
+            if value > 5.0:
                 issues.append({
                     'mode': "LR_TOO_HIGH",
                     'step': step,
