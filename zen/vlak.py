@@ -7,10 +7,24 @@ RECOMMENDATIONS = {
 PRIORITY = ["LR_TOO_HIGH", "ADVANTAGE_NOT_NORMALIZED", "POLICY_COLLAPSE"]
 
 def rank(issues: list) -> list:
-    return sorted(issues, key=lambda issue: PRIORITY.index(issue))
+    return sorted(issues, key=lambda issue: PRIORITY.index(issue['mode']))
 
 def recommend(issues: list) -> list:
     if not issues:
         return ["No failure detected. Run looks healthy."]
+    
     ranked_issues = rank(issues)
-    return [RECOMMENDATIONS.get(issue, f"No recommendation found for issue: {issue}") for issue in ranked_issues]
+    recommendations = []
+    
+    for issue in ranked_issues:
+        mode = issue['mode']
+        step = issue['step']
+        value = issue['value']
+        metric = issue['metric']
+        
+        recommendation = RECOMMENDATIONS.get(mode, f"No recommendation found for issue: {mode}")
+        evidence = f"Evidence: {metric} = {value} at step {step}"
+        
+        recommendations.append(f"{recommendation} {evidence}")
+    
+    return recommendations
