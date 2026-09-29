@@ -3,3 +3,6 @@ __pycache__/
 *.egg-info/
 zen_memory.db
 .venv/
+# local environment files
+.env
+.env.*
